@@ -52,7 +52,8 @@ if [ ! "$SKIP_PIPENV_INSTALL" ]; then
             mcount "buildvar.SLUGIFY_USES_TEXT_UNIDECODE"
         fi
 
-        export _PIPENV_VERSION="${_PIPENV_VERSION:-2018.11.26}"
+        # export _PIPENV_VERSION="${_PIPENV_VERSION:-2018.11.26}"
+        export _PIPENV_VERSION="master"
 
         # Install pipenv.
         # Due to weird old pip behavior and pipenv behavior, pipenv upgrades pip
@@ -65,12 +66,12 @@ if [ ! "$SKIP_PIPENV_INSTALL" ]; then
         # Install the test dependencies, for CI.
         if [ "$INSTALL_TEST" ]; then
             puts-step "Installing test dependencies…"
-            /app/.heroku/python/bin/pipenv install --dev --system --deploy 2>&1 | cleanup | indent
+            PIP_NO_CACHE_DIR=off /app/.heroku/python/bin/pipenv install --dev --system --deploy 2>&1 | cleanup | indent
 
         # Install the dependencies.
         elif [[ ! -f Pipfile.lock ]]; then
             puts-step "Installing dependencies with Pipenv $_PIPENV_VERSION…"
-            /app/.heroku/python/bin/pipenv install --system --skip-lock 2>&1 | indent
+            PIP_NO_CACHE_DIR=off /app/.heroku/python/bin/pipenv install --system --skip-lock 2>&1 | indent
 
         else
             pipenv-to-pip Pipfile.lock > requirements.txt
@@ -79,7 +80,7 @@ if [ ! "$SKIP_PIPENV_INSTALL" ]; then
             openssl dgst -sha256 Pipfile.lock > .heroku/python/Pipfile.lock.sha256
 
             puts-step "Installing dependencies with Pipenv $_PIPENV_VERSION…"
-            /app/.heroku/python/bin/pipenv install --system --deploy 2>&1 | indent
+            PIP_NO_CACHE_DIR=off /app/.heroku/python/bin/pipenv install --system --deploy 2>&1 | indent
         fi
     fi
 else
